@@ -1,16 +1,20 @@
 #!/usr/bin/env python2
 BSTATES = {'Empty':0, 'X':1, 'O':-1}
-GSTATES = {'In_Progress':0, 'XWon':BSTATES['X'], 
+GSTATES = {'In_Progress':0, 'Not_Started':3, 'XWon':BSTATES['X'],
                         'OWon':BSTATES['O'], 'Draw':2}
 
 class TicTacToeGame:
+
+    # TODO: keep track of a whole session instead of a single game?
+    #   how many times each player has won, etc.
+
     def __init__(self, size = 3, initial_state = None):
         # initial_state is used for testing
         self.SIZE = size
         self.board = [[BSTATES['Empty'] for i in range(self.SIZE)] \
                        for i in range(self.SIZE)]
         self.current_player = BSTATES['X']
-        self.mode = GSTATES['In_Progress']
+        self.mode = GSTATES['Not_Started']
         if initial_state:
             self.board = initial_state
 
@@ -60,8 +64,7 @@ class TicTacToeGame:
             return GSTATES['Draw']
 
         #otherwise
-        return GSTATES['In_Progress']
-
+        return GSTATES['In_Progress']        
 
     @staticmethod
     def is_winning_line(line):
@@ -77,6 +80,7 @@ class TicTacToeGame:
         else:
             return GSTATES['OWon']
 
+    # assuming game loop is implemented by UI
     def play(self):
         while self.mode == GSTATES['In_Progress']:
             break
@@ -140,5 +144,6 @@ if __name__ == "__main__":
     print 'GSTATES: ' + str(GSTATES)
 
     #Server().start_server()
-    #game = TicTacToeGame()
-    test_mode()
+    game = TicTacToeGame()
+    game.make_random_move(BSTATES['X'])
+    #test_mode()
