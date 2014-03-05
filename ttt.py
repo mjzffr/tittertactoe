@@ -2,7 +2,7 @@
 import random
 
 BSTATES = {'Empty':0, 'X':1, 'O':-1}
-GSTATES = {'In_Progress':0, 'Not_Started':3, 'XWon':BSTATES['X'],
+GSTATES = {'In_Progress':4, 'Not_Started':3, 'XWon':BSTATES['X'],
                         'OWon':BSTATES['O'], 'Draw':2}
 
 class TicTacToeGame:
@@ -17,6 +17,7 @@ class TicTacToeGame:
                        for i in range(self.SIZE)]
         self.current_player = BSTATES['X']
         self.mode = GSTATES['Not_Started']
+        self.lastwincoords = []
         if initial_state:
             self.board = initial_state
 
@@ -35,8 +36,9 @@ class TicTacToeGame:
                 enumerate(row) if spot == bstate]
  
     def is_over(self):
-        print "Check %s" % self.mode
-        return self.mode in (GSTATES['XWon'], GSTATES['OWon'], GSTATES['Draw'])
+        #print "Check %s" % self.mode
+        return self.mode <= 2
+        #return self.mode in (GSTATES['XWon'], GSTATES['OWon'], GSTATES['Draw'])
 
     def make_move(self, player, location):
         ''' player is 1 or -1 (for X or O)
@@ -71,23 +73,32 @@ class TicTacToeGame:
         s = self.SIZE
         # TODO: could be way more efficient. Don't need to check until 5 moves
         # have been made
-        for row in self.board:
+        for ri,row in enumerate(self.board):
             if TicTacToeGame.is_winning_line(row):
                 self.mode = TicTacToeGame.winner_to_mode(row[0])
+                self.lastwincoords = [(ri,i) for i in range(s)]
                 return
-        for col in zip(*self.board):
+        for ci,col in enumerate(zip(*self.board)):
             if TicTacToeGame.is_winning_line(col):
                 self.mode = TicTacToeGame.winner_to_mode(col[0])
+                self.lastwincoords = [(i,ci) for i in range(s)]
                 return
-        diagonals = [[self.board[i][i] for i in range(s)], \
-                     [self.board[s - 1 -i][i] for i in range(s)]]
-        for l in diagonals:
+        
+        diagonal_coords = [[(i,i) for i in range(s)], 
+            [(s-1-i, i) for i in range(s)]]
+        diagonals = [[self.board[i][i] for i in range(s)], 
+            [self.board[s-1-i][i] for i in range(s)]]
+            
+                     
+        for i,l in enumerate(diagonals):
             if TicTacToeGame.is_winning_line(l):
                 self.mode = TicTacToeGame.winner_to_mode(l[0])
+                self.lastwincoords = diagonal_coords[i]
                 return
         #it's a draw
         if BSTATES['Empty'] not in [i for row in self.board for i in row]:
             self.mode = GSTATES['Draw']
+            self.lastwincoords = []
             return
 
         #otherwise
@@ -133,28 +144,44 @@ def test_mode():
     print game
     game.update_mode()
     print game.mode
+    print game.lastwincoords
     print
     game = TicTacToeGame(initial_state=[[1,1,-1],[-1,1,1],[1,-1,-1]]) 
     print game
     game.update_mode()
     print game.mode
+    print game.lastwincoords
     print
     game = TicTacToeGame(initial_state=[[1,0,0],[0,1,0],[0,1,0]]) 
     print game
     game.update_mode()
     print game.mode
+    print game.lastwincoords
     print
     game = TicTacToeGame(initial_state=[[1,0,0],[0,1,0],[0,0,1]]) 
     print game
     game.update_mode()
     print game.mode
+    print game.lastwincoords
     print
     game = TicTacToeGame(initial_state=[[-1,0,0],[-1,1,0],[-1,0,1]]) 
     print game
     game.update_mode()
     print game.mode
+    print game.lastwincoords
     print
-
+    game = TicTacToeGame(initial_state=[[-1,-1,-1],[1,1,0],[1,0,1]]) 
+    print game
+    game.update_mode()
+    print game.mode
+    print game.lastwincoords
+    print
+    game = TicTacToeGame(initial_state=[[1,0,1],[-1,1,0],[1,0,-1]]) 
+    print game
+    game.update_mode()
+    print game.mode
+    print game.lastwincoords
+    print
 
 def test_moves(game):
     game.update_mode()
