@@ -22,13 +22,13 @@ class TicTacToeGame:
 
     def make_random_move(self, player):
         ''' player is 1 or -1 (for X or O)
-            returns the int mode that results after the move (see GSTATES)
+            returns the location that was changed
         '''
         location = random.choice(self.get_locations(BSTATES['Empty']))
         return self.make_move(player, location)
         
     def get_locations(self, bstate):
-        ''' returns list of (row, col) tuples ''''
+        ''' returns list of (row, col) tuples '''
         board = self.board
         return [(ri,ci) for ri,row in 
                 enumerate(board) for ci,spot in 
@@ -38,9 +38,9 @@ class TicTacToeGame:
     def make_move(self, player, location):
         ''' player is 1 or -1 (for X or O)
             location is tuple of row,col coords
-            returns the int mode that results after the move (see GSTATES)
+            returns location that was changed
         '''
-        (row,col) = location
+        (row, col) = location
         # validate
         size = self.SIZE
         if player != self.current_player:
@@ -61,8 +61,7 @@ class TicTacToeGame:
         print(self)
         print
         #
-        return self.update_mode();
-
+        return location
 
     def update_mode(self):
         ''' determines whether game is over '''
