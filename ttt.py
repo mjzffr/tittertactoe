@@ -34,6 +34,9 @@ class TicTacToeGame:
                 enumerate(board) for ci,spot in 
                 enumerate(row) if spot == bstate]
  
+    def is_over(self):
+        print "Check %s" % self.mode
+        return self.mode in (GSTATES['XWon'], GSTATES['OWon'], GSTATES['Draw'])
 
     def make_move(self, player, location):
         ''' player is 1 or -1 (for X or O)
@@ -56,8 +59,8 @@ class TicTacToeGame:
             self.current_player *= -1
         else:
             raise ValueError("Location already full " + str(location))
-        #
-        print(self.update_mode())
+        
+        self.update_mode()
         print(self)
         print
         #
@@ -70,21 +73,25 @@ class TicTacToeGame:
         # have been made
         for row in self.board:
             if TicTacToeGame.is_winning_line(row):
-                return TicTacToeGame.winner_to_mode(row[0])
+                self.mode = TicTacToeGame.winner_to_mode(row[0])
+                return
         for col in zip(*self.board):
             if TicTacToeGame.is_winning_line(col):
-                return TicTacToeGame.winner_to_mode(col[0])
+                self.mode = TicTacToeGame.winner_to_mode(col[0])
+                return
         diagonals = [[self.board[i][i] for i in range(s)], \
                      [self.board[s - 1 -i][i] for i in range(s)]]
         for l in diagonals:
             if TicTacToeGame.is_winning_line(l):
-                return TicTacToeGame.winner_to_mode(l[0])
+                self.mode = TicTacToeGame.winner_to_mode(l[0])
+                return
         #it's a draw
         if BSTATES['Empty'] not in [i for row in self.board for i in row]:
-            return GSTATES['Draw']
+            self.mode = GSTATES['Draw']
+            return
 
         #otherwise
-        return GSTATES['In_Progress']        
+        self.mode = GSTATES['In_Progress']        
 
     @staticmethod
     def is_winning_line(line):
@@ -124,28 +131,33 @@ class TicTacToeGame:
 def test_mode():
     game = TicTacToeGame(initial_state=[[0,0,0],[0,0,0],[0,0,0]]) 
     print game
-    print game.update_mode()
+    game.update_mode()
+    print game.mode
     print
     game = TicTacToeGame(initial_state=[[1,1,-1],[-1,1,1],[1,-1,-1]]) 
     print game
-    print game.update_mode()
+    game.update_mode()
+    print game.mode
     print
     game = TicTacToeGame(initial_state=[[1,0,0],[0,1,0],[0,1,0]]) 
     print game
-    print game.update_mode()
+    game.update_mode()
+    print game.mode
     print
     game = TicTacToeGame(initial_state=[[1,0,0],[0,1,0],[0,0,1]]) 
     print game
-    print game.update_mode()
+    game.update_mode()
+    print game.mode
     print
     game = TicTacToeGame(initial_state=[[-1,0,0],[-1,1,0],[-1,0,1]]) 
     print game
-    print game.update_mode()
+    game.update_mode()
+    print game.mode
     print
 
 
 def test_moves(game):
-    print game.update_mode()
+    game.update_mode()
     print(game.make_move(1, (1,0)))
     print game
     print(game.make_move(-1, (0,2)))
@@ -164,6 +176,6 @@ if __name__ == "__main__":
     print 'GSTATES: ' + str(GSTATES)
 
     #Server().start_server()
-    game = TicTacToeGame()
-    game.make_random_move(BSTATES['X'])
-    #test_mode()
+    #game = TicTacToeGame()
+    #game.make_random_move(BSTATES['X'])
+    test_mode()

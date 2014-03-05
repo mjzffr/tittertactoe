@@ -70,14 +70,31 @@ class TkTictactoe(ttk.Frame):
 
     def record_move(self, event):
         #if self.game.mode != ttt.GSTATES.mode('In_Progress'):
+        if not self.game.is_over():
+            if event.widget['text'] == '':
+                player = self.game.current_player
+                player_repr = PLAYER_LABELS[player]
+                self.game.make_move(player, self.find_button_coords(event.widget))
+                event.widget['text'] = player_repr
+                # computer responds to the above human move
+                self.record_computer_move()
+        else:
+            self.cleanup()
+            
 
-        if event.widget['text'] == '':
-            current_player = PLAYER_LABELS[self.game.current_player]
-            self.game.make_move(self.game.current_player, 
-                                self.find_button_coords(event.widget))
-            event.widget['text'] = current_player
+    def record_computer_move(self):
+        if not self.game.is_over():
+            player = self.game.current_player
+            player_repr = PLAYER_LABELS[player]
+            (row, col) = self.game.make_random_move(player)
+            self.board[row][col]['text'] = player_repr
+        else:
+            self.cleanup()
 
-        
+    
+    def cleanup(self):   
+        print 'Done' 
+
     def start_new_game(self):
         if self.game.mode == ttt.GSTATES['In_Progress']:
             self.gameslost += 1 
