@@ -1,4 +1,6 @@
 #!/usr/bin/env python2
+import random
+
 BSTATES = {'Empty':0, 'X':1, 'O':-1}
 GSTATES = {'In_Progress':0, 'Not_Started':3, 'XWon':BSTATES['X'],
                         'OWon':BSTATES['O'], 'Draw':2}
@@ -18,6 +20,20 @@ class TicTacToeGame:
         if initial_state:
             self.board = initial_state
 
+    def make_random_move(self, player):
+        ''' player is 1 or -1 (for X or O)
+            returns the int mode that results after the move (see GSTATES)
+        '''
+        location = random.choice(self.get_locations(BSTATES['Empty']))
+        return self.make_move(player, location)
+        
+    def get_locations(self, bstate):
+        ''' returns list of (row, col) tuples ''''
+        board = self.board
+        return [(ri,ci) for ci,row in 
+                enumerate(board) for ri,spot in 
+                enumerate(row) if spot == bstate]
+ 
 
     def make_move(self, player, location):
         ''' player is 1 or -1 (for X or O)
@@ -40,6 +56,11 @@ class TicTacToeGame:
             self.current_player *= -1
         else:
             raise ValueError("Location already full " + str(location))
+        #
+        print(self.update_mode())
+        print(self)
+        print
+        #
         return self.update_mode();
 
 
