@@ -30,8 +30,8 @@ class TicTacToeGame:
     def get_locations(self, bstate):
         ''' returns list of (row, col) tuples ''''
         board = self.board
-        return [(ri,ci) for ci,row in 
-                enumerate(board) for ri,spot in 
+        return [(ri,ci) for ri,row in 
+                enumerate(board) for ci,spot in 
                 enumerate(row) if spot == bstate]
  
 
