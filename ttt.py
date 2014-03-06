@@ -2,22 +2,25 @@
 import random
 
 BSTATES = {'EMPTY':0, 'P1':1, 'P2':-1}
-GSTATES = {'INPROGRESS':4, 'NOTSTARTED':3, 'P2WON':BSTATES['P1'],
-                        'P1WON':BSTATES['P2'], 'DRAW':2}
+GSTATES = {'INPROGRESS':4, 'NOTSTARTED':3, 'P2WON':BSTATES['P2'],
+                        'P1WON':BSTATES['P1'], 'DRAW':2}
 
 class TicTacToeGame:
 
-    # TODO: keep track of a whole session instead of a single game?
-    #   how many times each player has won, etc.
-
     def __init__(self, size = 3, initial_state = None):
-        # initial_state is used for testing
         self.SIZE = size
         self.board = [[BSTATES['EMPTY'] for i in range(self.SIZE)] \
                        for i in range(self.SIZE)]
+        
         self.current_player = BSTATES['P1']
         self.mode = GSTATES['NOTSTARTED']
+        
+        self.wins = {BSTATES['P1']:0, BSTATES['P2']:0}
+        self.losses = {BSTATES['P1']:0, BSTATES['P2']:0}
+        
         self.lastwincoords = []
+        
+        # for testing
         if initial_state:
             self.board = initial_state
 
@@ -58,35 +61,48 @@ class TicTacToeGame:
         # update state
         if self.board[row][col] == BSTATES['EMPTY']:
             self.board[row][col] = player
-            self.current_player *= -1
+            self.update_mode()
+            print self.mode
+            if self.mode == GSTATES['INPROGRESS']:
+                # only switch turns if most recent move did not end the game
+                self.current_player *= -1
         else:
             raise ValueError("Location already full " + str(location))
-        
-        self.update_mode()
         print self 
         print
         
         return location
 
+    def update_points(self):
+        if self.mode == GSTATES['P1WON']:
+            self.wins[BSTATES['P1']] += 1
+            self.losses[BSTATES['P2']] += 1
+        elif self.mode == GSTATES['P2WON']:
+            self.wins[BSTATES['P2']] += 1
+            self.losses[BSTATES['P1']] += 1        
+
+    def update_mode_helper(self, winner, line):
+        self.mode = TicTacToeGame.winner_to_mode(winner)
+        self.lastwincoords = line
+        self.update_points()
+
     def update_mode(self):
         ''' determines whether game is over '''
         s = self.SIZE
-       
-        board1d = [i for row in self.board for i in row]
+        board_1d = [i for row in self.board for i in row]
 
         # don't check until one player has made > SIZE moves
-        if board1d.count(BSTATES['EMPTY']) > s ** 2 - (s * 2 - 1):
+        if board_1d.count(BSTATES['EMPTY']) > s ** 2 - (s * 2 - 1):
+            self.mode = GSTATES['INPROGRESS']        
             return
         
         for ri,row in enumerate(self.board):
             if TicTacToeGame.is_winning_line(row):
-                self.mode = TicTacToeGame.winner_to_mode(row[0])
-                self.lastwincoords = [(ri,i) for i in range(s)]
+                self.update_mode_helper(row[0], [(ri,i) for i in range(s)])
                 return
         for ci,col in enumerate(zip(*self.board)):
             if TicTacToeGame.is_winning_line(col):
-                self.mode = TicTacToeGame.winner_to_mode(col[0])
-                self.lastwincoords = [(i,ci) for i in range(s)]
+                self.update_mode_helper(col[0], [(i,ci) for i in range(s)])
                 return
         
         diagonal_coords = [[(i,i) for i in range(s)], 
@@ -96,12 +112,11 @@ class TicTacToeGame:
                 
         for i,l in enumerate(diagonals):
             if TicTacToeGame.is_winning_line(l):
-                self.mode = TicTacToeGame.winner_to_mode(l[0])
-                self.lastwincoords = diagonal_coords[i]
+                self.update_mode_helper(l[0], diagonal_coords[i])
                 return
         
         #it's a draw
-        if BSTATES['EMPTY'] not in board1d:
+        if BSTATES['EMPTY'] not in board_1d:
             self.mode = GSTATES['DRAW']
             self.lastwincoords = []
             return
@@ -207,7 +222,6 @@ def test_moves(game):
 if __name__ == "__main__":
     print 'BSTATES: ' + str(BSTATES)
     print 'GSTATES: ' + str(GSTATES)
-
     #Server().start_server()
     #game = TicTacToeGame()
     #game.make_random_move(BSTATES['P1'])
