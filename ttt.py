@@ -63,16 +63,21 @@ class TicTacToeGame:
             raise ValueError("Location already full " + str(location))
         
         self.update_mode()
-        print(self)
+        print self 
         print
-        #
+        
         return location
 
     def update_mode(self):
         ''' determines whether game is over '''
         s = self.SIZE
-        # TODO: could be way more efficient. Don't need to check until 5 moves
-        # have been made
+       
+        board1d = [i for row in self.board for i in row]
+
+        # don't check until one player has made > SIZE moves
+        if board1d.count(BSTATES['EMPTY']) > s ** 2 - (s * 2 - 1):
+            return
+        
         for ri,row in enumerate(self.board):
             if TicTacToeGame.is_winning_line(row):
                 self.mode = TicTacToeGame.winner_to_mode(row[0])
@@ -88,15 +93,15 @@ class TicTacToeGame:
             [(s-1-i, i) for i in range(s)]]
         diagonals = [[self.board[i][i] for i in range(s)], 
             [self.board[s-1-i][i] for i in range(s)]]
-            
-                     
+                
         for i,l in enumerate(diagonals):
             if TicTacToeGame.is_winning_line(l):
                 self.mode = TicTacToeGame.winner_to_mode(l[0])
                 self.lastwincoords = diagonal_coords[i]
                 return
+        
         #it's a draw
-        if BSTATES['EMPTY'] not in [i for row in self.board for i in row]:
+        if BSTATES['EMPTY'] not in board1d:
             self.mode = GSTATES['DRAW']
             self.lastwincoords = []
             return
@@ -124,6 +129,7 @@ class TicTacToeGame:
             break
             #TODO
 
+    # for testing
     def __str__(self):
         boardstr = ''
         for row in self.board:
