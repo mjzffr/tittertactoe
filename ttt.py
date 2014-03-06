@@ -43,6 +43,15 @@ class TicTacToeGame:
         return self.mode <= 2
         #return self.mode in (GSTATES['XWon'], GSTATES['OWon'], GSTATES['Draw'])
 
+    def forfeit(self, player):
+        if self.mode == GSTATES['INPROGRESS']:
+            self.losses[player] += 1
+            self.wins[player * -1] += 1
+        self.board = [[BSTATES['EMPTY'] for i in range(self.SIZE)] \
+                   for i in range(self.SIZE)]
+        self.current_player = BSTATES['P1']
+        self.mode = GSTATES['NOTSTARTED']
+
     def make_move(self, player, location):
         ''' player is 1 or -1 (for X or O)
             location is tuple of row,col coords
