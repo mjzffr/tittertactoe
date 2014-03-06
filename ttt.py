@@ -1,9 +1,9 @@
 #!/usr/bin/env python2
 import random
 
-BSTATES = {'Empty':0, 'X':1, 'O':-1}
-GSTATES = {'In_Progress':4, 'Not_Started':3, 'XWon':BSTATES['X'],
-                        'OWon':BSTATES['O'], 'Draw':2}
+BSTATES = {'EMPTY':0, 'P1':1, 'P2':-1}
+GSTATES = {'INPROGRESS':4, 'NOTSTARTED':3, 'P2WON':BSTATES['P1'],
+                        'P1WON':BSTATES['P2'], 'DRAW':2}
 
 class TicTacToeGame:
 
@@ -13,10 +13,10 @@ class TicTacToeGame:
     def __init__(self, size = 3, initial_state = None):
         # initial_state is used for testing
         self.SIZE = size
-        self.board = [[BSTATES['Empty'] for i in range(self.SIZE)] \
+        self.board = [[BSTATES['EMPTY'] for i in range(self.SIZE)] \
                        for i in range(self.SIZE)]
-        self.current_player = BSTATES['X']
-        self.mode = GSTATES['Not_Started']
+        self.current_player = BSTATES['P1']
+        self.mode = GSTATES['NOTSTARTED']
         self.lastwincoords = []
         if initial_state:
             self.board = initial_state
@@ -25,7 +25,7 @@ class TicTacToeGame:
         ''' player is 1 or -1 (for X or O)
             returns the location that was changed
         '''
-        location = random.choice(self.get_locations(BSTATES['Empty']))
+        location = random.choice(self.get_locations(BSTATES['EMPTY']))
         return self.make_move(player, location)
         
     def get_locations(self, bstate):
@@ -56,7 +56,7 @@ class TicTacToeGame:
             raise ValueError("Invalid location value " + str(location))
 
         # update state
-        if self.board[row][col] == BSTATES['Empty']:
+        if self.board[row][col] == BSTATES['EMPTY']:
             self.board[row][col] = player
             self.current_player *= -1
         else:
@@ -96,31 +96,31 @@ class TicTacToeGame:
                 self.lastwincoords = diagonal_coords[i]
                 return
         #it's a draw
-        if BSTATES['Empty'] not in [i for row in self.board for i in row]:
-            self.mode = GSTATES['Draw']
+        if BSTATES['EMPTY'] not in [i for row in self.board for i in row]:
+            self.mode = GSTATES['DRAW']
             self.lastwincoords = []
             return
 
         #otherwise
-        self.mode = GSTATES['In_Progress']        
+        self.mode = GSTATES['INPROGRESS']        
 
     @staticmethod
     def is_winning_line(line):
         ''' return true if line consists of all 'X' or 'O';
         line is a list of board spaces, like a row or a diagonal'''
-        return BSTATES['Empty'] not in line and all(line[0] == i for i in \
+        return BSTATES['EMPTY'] not in line and all(line[0] == i for i in \
                                                       line)
 
     @staticmethod
     def winner_to_mode(player):
-        if player == BSTATES['X']:
-            return GSTATES['XWon']
+        if player == BSTATES['P1']:
+            return GSTATES['P1WON']
         else:
-            return GSTATES['OWon']
+            return GSTATES['P2WON']
 
     # assuming game loop is implemented by UI
     def play(self):
-        while self.mode == GSTATES['In_Progress']:
+        while self.mode == GSTATES['INPROGRESS']:
             break
             #TODO
 
@@ -128,9 +128,9 @@ class TicTacToeGame:
         boardstr = ''
         for row in self.board:
             for i in row:
-                if i == BSTATES['X']:
+                if i == BSTATES['P1']:
                     boardstr += 'X'
-                elif i == BSTATES['O']:
+                elif i == BSTATES['P2']:
                     boardstr += 'O'
                 else:
                     boardstr += '_'
@@ -204,5 +204,5 @@ if __name__ == "__main__":
 
     #Server().start_server()
     #game = TicTacToeGame()
-    #game.make_random_move(BSTATES['X'])
+    #game.make_random_move(BSTATES['P1'])
     test_mode()

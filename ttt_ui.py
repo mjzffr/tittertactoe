@@ -99,11 +99,11 @@ class TkTictactoe(ttk.Frame):
         
         mode = self.game.mode
 
-        if mode == ttt.GSTATES['XWon']:
+        if mode == ttt.GSTATES['P1WON']:
             self.gameswon += 1
             print "Won: %s" % self.gameswon
             self.update_game_count_lbl(self.gwonlbl, self.gameswon)
-        elif mode == ttt.GSTATES['OWon']:
+        elif mode == ttt.GSTATES['P2WON']:
             self.gameslost += 1
             print "Lost: %s" % self.gameslost 
             self.update_game_count_lbl(self.glostlbl, self.gameslost)
@@ -113,7 +113,7 @@ class TkTictactoe(ttk.Frame):
                 self.board[row][col].configure(fg="red")        
 
     def start_new_game(self):
-        if self.game.mode == ttt.GSTATES['In_Progress']:
+        if self.game.mode == ttt.GSTATES['INPROGRESS']:
             self.gameslost += 1 
             self.update_game_count_lbl(self.glostlbl, self.gameslost)
         self.game = ttt.TicTacToeGame()
