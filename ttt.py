@@ -91,7 +91,7 @@ class TicTacToeGame:
             self.losses[BSTATES['P1']] += 1        
 
     def update_mode_helper(self, winner, line):
-        self.mode = TicTacToeGame.winner_to_mode(winner)
+        self.mode = winner
         self.lastwincoords = line
         self.update_points()
 
@@ -140,12 +140,6 @@ class TicTacToeGame:
         return BSTATES['EMPTY'] not in line and all(line[0] == i for i in \
                                                       line)
 
-    @staticmethod
-    def winner_to_mode(player):
-        if player == BSTATES['P1']:
-            return GSTATES['P1WON']
-        else:
-            return GSTATES['P2WON']
 
     # assuming game loop is implemented by UI
     def play(self):
