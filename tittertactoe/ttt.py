@@ -41,7 +41,8 @@ class TicTacToeGame:
     def is_over(self):
         return self.mode <= 2
 
-    def forfeit(self, player):
+
+    def reset(self, player):
         if self.mode == GSTATES['INPROGRESS']:
             self.losses[player] += 1
             self.wins[player * -1] += 1
