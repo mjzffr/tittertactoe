@@ -28,6 +28,9 @@ class TicTacToeGame:
         ''' player is 1 or -1 (for X or O)
             returns the location that was changed
         '''
+        if self.is_over():
+            raise Exception("No game in progress. Game over.")
+
         location = random.choice(self.get_locations(BSTATES['EMPTY']))
         return self.make_move(player, location)
 
@@ -56,6 +59,9 @@ class TicTacToeGame:
             location is tuple of row,col coords
             returns location that was changed
         '''
+        if self.is_over():
+            raise Exception("No game in progress. Game over.")
+
         (row, col) = location
         # validate
         size = self.SIZE
