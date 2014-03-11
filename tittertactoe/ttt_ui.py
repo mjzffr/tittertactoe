@@ -62,12 +62,6 @@ class TkTictactoe(ttk.Frame):
         self.gwonlbl = ttk.Label(self, text="Games Won: 0")
         self.gwonlbl.grid(column=0, row=3)
 
-        
-    def quit(self):
-        # TODO: disconnect
-        self.master.quit()
-
-
     def record_move(self, event):
         ''' process human move '''
         #if game not over
