@@ -11,15 +11,15 @@ class TicTacToeGame:
         self.SIZE = size
         self.board = [[BSTATES['EMPTY'] for i in range(self.SIZE)] \
                        for i in range(self.SIZE)]
-        
+
         self.current_player = BSTATES['P1']
         self.mode = GSTATES['NOTSTARTED']
-        
+
         self.wins = {BSTATES['P1']:0, BSTATES['P2']:0}
         self.losses = {BSTATES['P1']:0, BSTATES['P2']:0}
-        
-        self.lastwincoords = []
-        
+
+        self.lastwincoords = set()
+
         # for testing
         if initial_state:
             self.board = initial_state
@@ -30,18 +30,16 @@ class TicTacToeGame:
         '''
         location = random.choice(self.get_locations(BSTATES['EMPTY']))
         return self.make_move(player, location)
-        
+
     def get_locations(self, bstate):
         ''' returns list of (row, col) tuples '''
         board = self.board
-        return [(ri,ci) for ri,row in 
-                enumerate(board) for ci,spot in 
+        return [(ri,ci) for ri,row in
+                enumerate(board) for ci,spot in
                 enumerate(row) if spot == bstate]
- 
+
     def is_over(self):
-        #print "Check %s" % self.mode
         return self.mode <= 2
-        #return self.mode in (GSTATES['XWon'], GSTATES['OWon'], GSTATES['Draw'])
 
     def forfeit(self, player):
         if self.mode == GSTATES['INPROGRESS']:
@@ -61,7 +59,7 @@ class TicTacToeGame:
         # validate
         size = self.SIZE
         if player != self.current_player:
-            msg = ("Invalid player " + str(player) + ". Should be " + 
+            msg = ("Invalid player " + str(player) + ". Should be " +
                     str(self.current_player))
             raise ValueError(msg)
         if row not in range(size) or col not in range(size):
@@ -71,15 +69,12 @@ class TicTacToeGame:
         if self.board[row][col] == BSTATES['EMPTY']:
             self.board[row][col] = player
             self.update_mode()
-            print self.mode
             if self.mode == GSTATES['INPROGRESS']:
                 # only switch turns if most recent move did not end the game
                 self.current_player *= -1
         else:
             raise ValueError("Location already full " + str(location))
-        print self 
-        print
-        
+
         return location
 
     def update_points(self):
@@ -88,11 +83,11 @@ class TicTacToeGame:
             self.losses[BSTATES['P2']] += 1
         elif self.mode == GSTATES['P2WON']:
             self.wins[BSTATES['P2']] += 1
-            self.losses[BSTATES['P1']] += 1        
+            self.losses[BSTATES['P1']] += 1
 
     def update_mode_helper(self, winner, line):
         self.mode = winner
-        self.lastwincoords = line
+        self.lastwincoords = set(line)
         self.update_points()
 
     def update_mode(self):
@@ -102,9 +97,9 @@ class TicTacToeGame:
 
         # don't check until one player has made > SIZE moves
         if board_1d.count(BSTATES['EMPTY']) > s ** 2 - (s * 2 - 1):
-            self.mode = GSTATES['INPROGRESS']        
+            self.mode = GSTATES['INPROGRESS']
             return
-        
+
         for ri,row in enumerate(self.board):
             if TicTacToeGame.is_winning_line(row):
                 self.update_mode_helper(row[0], [(ri,i) for i in range(s)])
@@ -113,25 +108,25 @@ class TicTacToeGame:
             if TicTacToeGame.is_winning_line(col):
                 self.update_mode_helper(col[0], [(i,ci) for i in range(s)])
                 return
-        
-        diagonal_coords = [[(i,i) for i in range(s)], 
+
+        diagonal_coords = [[(i,i) for i in range(s)],
             [(s-1-i, i) for i in range(s)]]
-        diagonals = [[self.board[i][i] for i in range(s)], 
+        diagonals = [[self.board[i][i] for i in range(s)],
             [self.board[s-1-i][i] for i in range(s)]]
-                
+
         for i,l in enumerate(diagonals):
             if TicTacToeGame.is_winning_line(l):
                 self.update_mode_helper(l[0], diagonal_coords[i])
                 return
-        
+
         #it's a draw
         if BSTATES['EMPTY'] not in board_1d:
             self.mode = GSTATES['DRAW']
-            self.lastwincoords = []
+            self.lastwincoords = set()
             return
 
         #otherwise
-        self.mode = GSTATES['INPROGRESS']        
+        self.mode = GSTATES['INPROGRESS']
 
     @staticmethod
     def is_winning_line(line):
