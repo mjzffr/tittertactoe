@@ -64,15 +64,14 @@ class TkTictactoe(ttk.Frame):
 
     def record_move(self, event):
         ''' process human move '''
-        #if game not over
-        if self.game.mode >= 3:
+        if not self.game.is_over():
             if event.widget['text'] == '':
                 P = self.THISPLAYER
                 player_repr = PLAYER_LABELS[P]
                 self.game.make_move(P, self.find_button_coords(event.widget))
                 event.widget['text'] = player_repr
                 # check for game over each time make_move is called
-                if self.game.mode <= 2:
+                if self.game.is_over():
                     self.cleanup()
                 self.record_computer_move()
 
@@ -84,7 +83,7 @@ class TkTictactoe(ttk.Frame):
             (row, col) = self.game.make_random_move(PLAYER)
             self.board[row][col]['text'] = player_repr
             # check for game over each time make_move is called
-            if self.game.mode <= 2:
+            if self.game.is_over():
                 self.cleanup()
 
 
