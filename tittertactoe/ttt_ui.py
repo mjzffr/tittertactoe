@@ -112,7 +112,7 @@ class TkTictactoe(ttk.Frame):
 
     def update_status_lbl(self, label, newcount):
         ltext = label['text']
-        label['text'] = (ltext[:ltext.rindex(':') + 1] +
+        label['text'] = (ltext[:ltext.rindex(':') + 1] + " " +
                         str(newcount))
 
     def find_button_coords(self, button):
