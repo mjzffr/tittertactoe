@@ -8,8 +8,10 @@ import ttt
 
 WIDTH = 750
 HEIGHT = 800
-PLAYER_LABELS = {1:'X', -1:'O', 0:''}
 
+PLAYER_LABELS = {ttt.BSTATES['P1']:'X',
+                 ttt.BSTATES['P2']:'O',
+                 ttt.BSTATES['EMPTY']:''}
 
 class TkTictactoe(ttk.Frame):
 
