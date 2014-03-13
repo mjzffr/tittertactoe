@@ -53,7 +53,7 @@ class TicTacToeGame:
         self.current_player = BSTATES['P1']
         self.mode = GSTATES['NOTSTARTED']
 
-    def make_move(self, player, location):
+    def make_move(self, player, (row,col)):
         ''' player is 1 or -1 (for X or O)
             location is tuple of row,col coords
             returns location that was changed
@@ -61,7 +61,6 @@ class TicTacToeGame:
         if self.is_over():
             raise Exception("No game in progress. Game over.")
 
-        (row, col) = location
         # validate
         size = self.size
         if player != self.current_player:
@@ -69,7 +68,7 @@ class TicTacToeGame:
                     str(self.current_player))
             raise ValueError(msg)
         if row not in range(size) or col not in range(size):
-            raise ValueError("Invalid location value " + str(location))
+            raise ValueError("Invalid location value " + str((row, col)))
 
         # update state
         if self.board[row][col] == BSTATES['EMPTY']:
@@ -79,9 +78,9 @@ class TicTacToeGame:
                 # only switch turns if most recent move did not end the game
                 self.current_player *= -1
         else:
-            raise ValueError("Location already full " + str(location))
+            raise ValueError("Location already full " + str((row, col)))
 
-        return location
+        return (row, col)
 
     def update_points(self):
         if self.mode == GSTATES['P1WON']:
@@ -126,7 +125,7 @@ class TicTacToeGame:
                 return
 
         #it's a draw
-        if BSTATES['EMPTY'] not in board_1d:
+        if BSTATES['EMPTY'] not in self.flatboard:
             self.mode = GSTATES['DRAW']
             self.lastwincoords = set()
             return
