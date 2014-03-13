@@ -89,14 +89,17 @@ class TicTacToeGame:
         elif self.mode == GSTATES['P2WON']:
             self.wins[BSTATES['P2']] += 1
             self.losses[BSTATES['P1']] += 1
+        
+    @property
+    def board_1d(self):
+        return [i for row in self.board for i in row]
 
     def update_mode(self):
         ''' determines whether game is over '''
         s = self.size
-        board_1d = [i for row in self.board for i in row]
 
         # don't check until one player has made > size moves
-        if board_1d.count(BSTATES['EMPTY']) > s ** 2 - (s * 2 - 1):
+        if self.board_1d.count(BSTATES['EMPTY']) > s ** 2 - (s * 2 - 1):
             self.mode = GSTATES['INPROGRESS']
             return
 
@@ -125,7 +128,7 @@ class TicTacToeGame:
                 return
 
         #it's a draw
-        if BSTATES['EMPTY'] not in self.flatboard:
+        if BSTATES['EMPTY'] not in self.board_1d:
             self.mode = GSTATES['DRAW']
             self.lastwincoords = set()
             return
