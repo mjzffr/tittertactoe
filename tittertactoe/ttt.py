@@ -8,9 +8,8 @@ GSTATES = {'INPROGRESS':4, 'NOTSTARTED':3, 'P2WON':BSTATES['P2'],
 class TicTacToeGame:
 
     def __init__(self, size = 3, initial_state = None):
-        self.SIZE = size
-        self.board = [[BSTATES['EMPTY'] for i in range(self.SIZE)] \
-                       for i in range(self.SIZE)]
+        self.size = size
+        self.board = [[BSTATES['EMPTY']] * self.size for _ in range(self.size)]
 
         self.current_player = BSTATES['P1']
         self.mode = GSTATES['NOTSTARTED']
@@ -49,8 +48,8 @@ class TicTacToeGame:
         if self.mode == GSTATES['INPROGRESS']:
             self.losses[player] += 1
             self.wins[player * -1] += 1
-        self.board = [[BSTATES['EMPTY'] for i in range(self.SIZE)] \
-                   for i in range(self.SIZE)]
+        self.board = [[BSTATES['EMPTY'] for i in range(self.size)] \
+                   for i in range(self.size)]
         self.current_player = BSTATES['P1']
         self.mode = GSTATES['NOTSTARTED']
 
@@ -64,7 +63,7 @@ class TicTacToeGame:
 
         (row, col) = location
         # validate
-        size = self.SIZE
+        size = self.size
         if player != self.current_player:
             msg = ("Invalid player " + str(player) + ". Should be " +
                     str(self.current_player))
@@ -92,28 +91,28 @@ class TicTacToeGame:
             self.wins[BSTATES['P2']] += 1
             self.losses[BSTATES['P1']] += 1
 
-    def update_mode_helper(self, winner, line):
-        self.mode = winner
-        self.lastwincoords = set(line)
-        self.update_points()
-
     def update_mode(self):
         ''' determines whether game is over '''
-        s = self.SIZE
+        s = self.size
         board_1d = [i for row in self.board for i in row]
 
-        # don't check until one player has made > SIZE moves
+        # don't check until one player has made > size moves
         if board_1d.count(BSTATES['EMPTY']) > s ** 2 - (s * 2 - 1):
             self.mode = GSTATES['INPROGRESS']
             return
 
+        def update_mode_helper(line):
+            self.mode = self.board[line[0][0]][line[0][1]]
+            self.lastwincoords = set(line)
+            self.update_points()
+
         for ri,row in enumerate(self.board):
             if TicTacToeGame.is_winning_line(row):
-                self.update_mode_helper(row[0], [(ri,i) for i in range(s)])
+                update_mode_helper([(ri,i) for i in range(s)])
                 return
         for ci,col in enumerate(zip(*self.board)):
             if TicTacToeGame.is_winning_line(col):
-                self.update_mode_helper(col[0], [(i,ci) for i in range(s)])
+                update_mode_helper([(i,ci) for i in range(s)])
                 return
 
         diagonal_coords = [[(i,i) for i in range(s)],
@@ -123,7 +122,7 @@ class TicTacToeGame:
 
         for i,l in enumerate(diagonals):
             if TicTacToeGame.is_winning_line(l):
-                self.update_mode_helper(l[0], diagonal_coords[i])
+                update_mode_helper(diagonal_coords[i])
                 return
 
         #it's a draw
