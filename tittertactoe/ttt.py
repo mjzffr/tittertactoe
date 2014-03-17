@@ -1,19 +1,23 @@
 #!/usr/bin/env python2
 import random
 
+# suggestion: BSTATES and GSTATES moved into TicTacToeGame class or to
+# their own class? or something?
 BSTATES = {'EMPTY':0, 'P1':1, 'P2':-1}
+# suggestion: use tuple of strings instead of dict
 GSTATES = {'INPROGRESS':4, 'NOTSTARTED':3, 'P2WON':BSTATES['P2'],
                         'P1WON':BSTATES['P1'], 'DRAW':2}
 
 class TicTacToeGame:
 
-    def __init__(self, size = 3, initial_state = None):
-        self.size = size
-        self.board = [[BSTATES['EMPTY']] * self.size for _ in range(self.size)]
+    def __init__(self, size=3, initial_state=None):
+        self.SIZE = size
+        self.board = [[BSTATES['EMPTY']] * self.SIZE for _ in range(self.SIZE)]
 
         self.current_player = BSTATES['P1']
         self.mode = GSTATES['NOTSTARTED']
 
+        # TODO: feature addition: full game stats: draws, num games
         self.wins = {BSTATES['P1']:0, BSTATES['P2']:0}
         self.losses = {BSTATES['P1']:0, BSTATES['P2']:0}
 
@@ -48,8 +52,8 @@ class TicTacToeGame:
         if self.mode == GSTATES['INPROGRESS']:
             self.losses[player] += 1
             self.wins[player * -1] += 1
-        self.board = [[BSTATES['EMPTY'] for i in range(self.size)] \
-                   for i in range(self.size)]
+        self.board = [[BSTATES['EMPTY'] for i in range(self.SIZE)] \
+                   for i in range(self.SIZE)]
         self.current_player = BSTATES['P1']
         self.mode = GSTATES['NOTSTARTED']
 
@@ -62,7 +66,7 @@ class TicTacToeGame:
             raise Exception("No game in progress. Game over.")
 
         # validate
-        size = self.size
+        size = self.SIZE
         if player != self.current_player:
             msg = ("Invalid player " + str(player) + ". Should be " +
                     str(self.current_player))
@@ -89,14 +93,15 @@ class TicTacToeGame:
         elif self.mode == GSTATES['P2WON']:
             self.wins[BSTATES['P2']] += 1
             self.losses[BSTATES['P1']] += 1
-        
+
     @property
     def board_1d(self):
         return [i for row in self.board for i in row]
 
+        #rewrite to fix the repeated return statements
     def update_mode(self):
         ''' determines whether game is over '''
-        s = self.size
+        s = self.SIZE
 
         # don't check until one player has made > size moves
         if self.board_1d.count(BSTATES['EMPTY']) > s ** 2 - (s * 2 - 1):
