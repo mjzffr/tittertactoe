@@ -1,4 +1,3 @@
--e git+https://github.com/mjzffr/tittertactoe.git@743a3daa7f535ab64fc9183d8424eecfdf5eaae7#egg=TitterTacToe-master
 argparse==1.2.1
 py==1.4.20
 pytest==2.5.2
