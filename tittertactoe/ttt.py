@@ -1,20 +1,25 @@
 #!/usr/bin/env python2
 import random
 
+# suggestion: BSTATES and GSTATES moved into TicTacToeGame class or to
+# their own class? or something?
 BSTATES = {'EMPTY':0, 'P1':1, 'P2':-1}
+# suggestion: use tuple of strings instead of dict
 GSTATES = {'INPROGRESS':4, 'NOTSTARTED':3, 'P2WON':BSTATES['P2'],
                         'P1WON':BSTATES['P1'], 'DRAW':2}
 
 class TicTacToeGame:
 
-    def __init__(self, size = 3, initial_state = None):
+    def __init__(self, size=3, initial_state=None):
         self.SIZE = size
+        # note: range is deprecated in python2 but ok in python3
         self.board = [[BSTATES['EMPTY'] for i in range(self.SIZE)] \
                        for i in range(self.SIZE)]
 
         self.current_player = BSTATES['P1']
         self.mode = GSTATES['NOTSTARTED']
 
+        # TODO: feature addition: full game stats: draws, num games
         self.wins = {BSTATES['P1']:0, BSTATES['P2']:0}
         self.losses = {BSTATES['P1']:0, BSTATES['P2']:0}
 
@@ -97,6 +102,7 @@ class TicTacToeGame:
         self.lastwincoords = set(line)
         self.update_points()
 
+        #rewrite to fix the repeated return statements
     def update_mode(self):
         ''' determines whether game is over '''
         s = self.SIZE
