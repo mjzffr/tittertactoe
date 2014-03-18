@@ -59,7 +59,6 @@ class TicTacToeGame:
 
     def make_move(self, player, (row,col)):
         ''' player is 1 or -1 (for X or O)
-            location is tuple of row,col coords
             returns location that was changed
         '''
         if self.is_over():
