@@ -37,6 +37,64 @@ class TicTacToeGame:
         location = random.choice(self.get_locations(BSTATES['EMPTY']))
         return self.make_move(player, location)
 
+    def assign_value(self, player):
+        
+        def eval(player, lines):
+            empty_weight = 0.5
+            winning_weight = 999
+            opponent_win_weight = 99
+            value = 0
+            for line in lines:
+                bstates = self.get_bstates(line)
+                num_zeros = bstates.count(bstates.EMPTY)
+
+                s = sum(bstates) * player
+                # our winning spot
+                if s == 2:
+                    value += winning_weight
+                elif s == -2: # opponent's winning spot
+                    value += opponent_win_weight
+                else:
+                    value += num_zeros*empty_weight + s
+
+        
+        values = [[0] * self.SIZE for _ in range(self.SIZE)]
+        for row_i, row in enumerate(values):
+            for col_i, item in enumerate(row):
+                lines = []
+                if row_i == col_i || row_i+col_i == self.SIZE - 1:
+                    lines.append(self.get_diagonal_left())
+                    lines.append(assign_diagonal_right(player))
+                lines.append(assign_vertical(player))
+                lines.append(assign_horizontal(player))
+
+                values[row_i][col_i] = eval(player, lines)
+
+    def get_bstates(self, line):
+        return [self.board[row][col] for (row, col) in line]
+
+    def get_diagonal_left_coords(self):
+        return [(i,i) for i in range(self.SIZE)]
+            
+    def get_diagonal_right_coords(self):
+        return [(self.SIZE-1-i, i) for i in range(self.SIZE)]
+
+    def get_vertical_coords(self, col_i):
+        return [(i, col_i) for i in range(self.SIZE)]
+
+    def get_horizontal_coords(self, row_i):
+        return [(row_i, i) for i in range(self.SIZE)]
+
+    def optimal_move(self, weights):
+        #TODO:
+
+    def make_smart_move(self, player):
+        
+        weights = self.assign_value(player)
+        location = optimal_move(weights)
+
+        self.make_move(player, location)
+
     def get_locations(self, bstate):
         ''' returns list of (row, col) tuples '''
         board = self.board
