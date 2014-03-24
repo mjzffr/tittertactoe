@@ -37,45 +37,60 @@ class TicTacToeGame:
         location = random.choice(self.get_locations(BSTATES['EMPTY']))
         return self.make_move(player, location)
 
-    def assign_value(self, player):
-        
-        def eval(player, lines):
+    def collect_values(self, player):
+        def calc_value(player, lines):
             empty_weight = 0.5
             winning_weight = 999
             opponent_win_weight = 99
             value = 0
             for line in lines:
-                bstates = self.get_bstates(line)
-                num_zeros = bstates.count(bstates.EMPTY)
+                linestates = self.get_board_states(line)
+                num_empty = linestates.count(BSTATES['EMPTY'])
+                num_opponent = linestates.count(player * -1)
+                num_player = linestates.count(player)
 
-                s = sum(bstates) * player
-                # our winning spot
-                if s == 2:
+                s = sum(linestates) * player
+                if s == self.SIZE - 1:
+                    # our winning spot
                     value += winning_weight
-                elif s == -2: # opponent's winning spot
+                elif s == -(self.SIZE - 1):
+                    # opponent's winning spot
                     value += opponent_win_weight
+                elif num_player > 0 and num_opponent > 0:
+                    # mixed line
+                    value = 0
                 else:
-                    value += num_zeros*empty_weight + s
+                    value += num_empty * empty_weight + s
+                    if num_player == 0 and num_opponent >= 1:
+                        # blocking opponent
+                        value += (empty_weight / 2 - s)
+            return value
 
-        
         values = [[0] * self.SIZE for _ in range(self.SIZE)]
-        for row_i, row in enumerate(values):
-            for col_i, item in enumerate(row):
-                lines = []
-                if row_i == col_i || row_i+col_i == self.SIZE - 1:
-                    lines.append(self.get_diagonal_left())
-                    lines.append(assign_diagonal_right(player))
-                lines.append(assign_vertical(player))
-                lines.append(assign_horizontal(player))
+        for ri, row in enumerate(values):
+            for ci, item in enumerate(row):
+                if self.board[ri][ci] != BSTATES['EMPTY']:
+                    values[ri][ci] = 0
+                else:
+                    lines = []
+                    if ri == ci:
+                        lines.append(self.get_diagonal_left_coords())
+                    if ri + ci == self.SIZE - 1:
+                        lines.append(self.get_diagonal_right_coords())
+                    lines.append(self.get_vertical_coords(ci))
+                    lines.append(self.get_horizontal_coords(ri))
 
-                values[row_i][col_i] = eval(player, lines)
+                    values[ri][ci] = calc_value(player, lines)
 
-    def get_bstates(self, line):
+        print values
+        return values
+
+    def get_board_states(self, line):
         return [self.board[row][col] for (row, col) in line]
 
     def get_diagonal_left_coords(self):
         return [(i,i) for i in range(self.SIZE)]
-            
+
     def get_diagonal_right_coords(self):
         return [(self.SIZE-1-i, i) for i in range(self.SIZE)]
 
@@ -85,15 +100,19 @@ class TicTacToeGame:
     def get_horizontal_coords(self, row_i):
         return [(row_i, i) for i in range(self.SIZE)]
 
-    def optimal_move(self, weights):
-        #TODO:
-
     def make_smart_move(self, player):
-        
-        weights = self.assign_value(player)
-        location = optimal_move(weights)
+        values = self.collect_values(player)
+        max_val = -1
+        (r, c) = (0, 0)
+        for ri, row in enumerate(values):
+            localmax = max(row)
+            if localmax > max_val:
+                max_val = localmax
+                r = ri
+                c = row.index(localmax) #random.choice([i for i,_ in enumerate(row) if value == max_val])
 
-        self.make_move(player, location)
+        return self.make_move(player, (r, c))
+
 
     def get_locations(self, bstate):
         ''' returns list of (row, col) tuples '''
@@ -225,3 +244,20 @@ class TicTacToeGame:
                     boardstr += '_'
             boardstr += '\n'
         return boardstr
+
+if __name__ == '__main__':
+    g = TicTacToeGame(initial_state=[[0,0,0],[0,0,0],[1,0,0]])
+    print g.collect_values(-1)
+
+
+'''
+Player = 1
+[[0,0,0],[0,0,0],[0,0,0]] -->
+[[4.5, 3.0, 4.5], [3.0, 6.0, 3.0], [4.5, 3.0, 4.5]]
+
+[[1,0,-1],[0,0,0],[1,0,-1]] -->
+[[-1, 2.0, -1], [1000.5, 4.0, 100.5], [-1, 2.0, -1]]
+
+[[1,0,0],[0,0,0],[0,0,-1]]
+
+'''

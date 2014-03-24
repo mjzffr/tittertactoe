@@ -82,7 +82,7 @@ class TkTictactoe(ttk.Frame):
         if not self.game.is_over():
             PLAYER = self.THISPLAYER * -1
             player_repr = PLAYER_LABELS[PLAYER]
-            (row, col) = self.game.make_random_move(PLAYER)
+            (row, col) = self.game.make_smart_move(PLAYER)
             self.board[row][col]['text'] = player_repr
             # check for game over each time make_move is called
             if self.game.is_over():
