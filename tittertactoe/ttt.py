@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 import random
+import copy
 
 # suggestion: BSTATES and GSTATES moved into TicTacToeGame class or to
 # their own class? or something?
@@ -100,6 +101,35 @@ class TicTacToeGame:
     def get_horizontal_coords(self, row_i):
         return [(row_i, i) for i in range(self.SIZE)]
 
+
+    def minimax_eval(self, player, possible_board):
+          # for ri,row in enumerate(self.board):
+          #   for ci,bstate in enumerate(row):
+          #       if bstate == BSTATES['EMPTY']:
+          #           self.minimax_eval(possible_board)
+          return 1
+
+    def make_minimax_move(self, player):
+        move_values = {}
+        for ri,row in enumerate(self.board):
+            for ci,bstate in enumerate(row):
+                if bstate == BSTATES['EMPTY']:
+                    possible_board = copy.deepcopy(self.board)
+                    possible_board[ri][ci] = player
+                    move_values[(ri, ci)] = self.minimax_eval(player, possible_board)
+
+        #choose random key in dictionary that has max value
+        maxval = max(move_values.values())
+        maxlist = [i[0] for i in move_values.iteritems() if i[1] == maxval]
+
+        return self.make_move(player, random.choice(maxlist))
+
+
+    # TODO: during draw, this always tries to use (0,0) as last move
+    #       File "tittertactoe/ttt.py", line 167, in make_move
+    #     raise ValueError("Location already full " + str((row, col)))
+    # ValueError: Location already full (0, 0)
+
     def make_smart_move(self, player):
         values = self.collect_values(player)
         max_val = -1
@@ -115,7 +145,8 @@ class TicTacToeGame:
 
 
     def get_locations(self, bstate):
-        ''' returns list of (row, col) tuples '''
+        ''' returns list of (row, col) tuples at which the board state is
+         bstate '''
         board = self.board
         return [(ri,ci) for ri,row in
                 enumerate(board) for ci,spot in
@@ -159,6 +190,8 @@ class TicTacToeGame:
                 self.current_player *= -1
         else:
             raise ValueError("Location already full " + str((row, col)))
+
+        print self
 
         return (row, col)
 
