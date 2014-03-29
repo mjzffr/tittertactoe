@@ -1,7 +1,7 @@
 tittertactoe
 ============
 
-An amazing tic tac toe game.
+An amazing tic tac toe game that uses minimax.
 
 I made this to play around with Tkinter GUIs, which is not that fun. I also practiced using pytest for the first time. Cool.
 ## Want to play?!
