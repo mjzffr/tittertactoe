@@ -19,9 +19,10 @@ class TkTictactoe(ttk.Frame):
         ttk.Frame.__init__(self, master, width=WIDTH, height=HEIGHT)
 
         self.game = ttt.TicTacToeGame()
-        # the user of this UI. ASSUMPTIONS: user is always P1 and P1 is
+        # the user of this UI. ASSUMPTIONS: user is always P2 and P1 is
         # always the first player
-        self.THISPLAYER = self.game.current_player
+        # Human moves second
+        self.THISPLAYER = self.game.current_player * -1
 
         # don't shrink the frame to its content
         self.grid_propagate(False)
@@ -39,6 +40,8 @@ class TkTictactoe(ttk.Frame):
         self.columnconfigure(2, weight=1)
         self.rowconfigure(2, weight=1)
         self.place_widgets()
+
+        self.record_computer_move()
 
 
     def place_widgets(self):
@@ -82,7 +85,7 @@ class TkTictactoe(ttk.Frame):
         if not self.game.is_over():
             PLAYER = self.THISPLAYER * -1
             player_repr = PLAYER_LABELS[PLAYER]
-            (row, col) = self.game.make_smart_move(PLAYER)
+            (row, col) = self.game.make_random_move(PLAYER)
             self.board[row][col]['text'] = player_repr
             # check for game over each time make_move is called
             if self.game.is_over():
@@ -92,10 +95,10 @@ class TkTictactoe(ttk.Frame):
     def cleanup(self):
         ''' update/reset after finished game '''
         mode = self.game.mode
-        if mode == ttt.GSTATES['P1WON']:
+        if mode == ttt.GSTATES['P2WON']:
             self.update_status_lbl(self.gwonlbl,
                                    self.game.wins[self.THISPLAYER])
-        elif mode == ttt.GSTATES['P2WON']:
+        elif mode == ttt.GSTATES['P1WON']:
             self.update_status_lbl(self.glostlbl,
                                    self.game.losses[self.THISPLAYER])
         if mode < 2: # X won or O won
@@ -111,6 +114,8 @@ class TkTictactoe(ttk.Frame):
             for b in row:
                 b['text'] = ''
                 b['fg'] = 'black'
+        self.record_computer_move()
+
 
     def update_status_lbl(self, label, newcount):
         ltext = label['text']
