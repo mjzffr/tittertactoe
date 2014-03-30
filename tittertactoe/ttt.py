@@ -103,30 +103,56 @@ class TicTacToeGame:
 
 
     def minimax_eval(self, player, possible_board):
-          '''
-          if game is over
-             return 1, -1, 0
-          '''
-          # for ri,row in enumerate(self.board):
-          #    for ci,bstate in enumerate(row):
-          #        if bstate == BSTATES['EMPTY']:
-          #            self.minimax_eval(player, possible_board)
-          return 1
+        boardstatus, _ = TicTacToeGame.calc_game_status(possible_board)
+        # check if game is done
+        if boardstatus == self.current_player:
+            return 1 #yay!
+        elif boardstatus == self.current_player * -1:
+            return -1 #boo :(
+        elif boardstatus == GSTATES['DRAW']:
+            return 0
+
+        # Otherwise: game is not done
+        # So, Rate all of possible moves by `player` by building the entire game tree
+        empty_spots = TicTacToeGame.get_locations(possible_board, BSTATES['EMPTY'])
+        next_move_values = []
+        for ri,ci in empty_spots:
+            next_board = copy.deepcopy(possible_board)
+            next_board[ri][ci] = player
+            next_move_values.append(self.minimax_eval(player * -1, next_board))
+
+        # pick best move for `player`
+        if player == self.current_player:
+            return max(next_move_values)
+        elif player == self.current_player * -1:
+            return min(next_move_values)
+        else:
+            return None
 
     def make_minimax_move(self, player):
-        move_values = {}
-        for ri,row in enumerate(self.board):
-            for ci,bstate in enumerate(row):
-                if bstate == BSTATES['EMPTY']:
-                    possible_board = copy.deepcopy(self.board)
-                    possible_board[ri][ci] = player
-                    move_values[(ri, ci)] = self.minimax_eval(player, possible_board)
+        moves_and_values = {}
+        empty_spots = TicTacToeGame.get_locations(self.board, BSTATES['EMPTY'])
+
+        if self.mode == GSTATES['NOTSTARTED']:
+            # still optimal and way faster to choose random at first
+           return self.make_random_move(player)
+
+        for ri,ci in empty_spots:
+            possible_board = copy.deepcopy(self.board)
+            possible_board[ri][ci] = player
+            moves_and_values[(ri, ci)] = self.minimax_eval(player * -1, possible_board)
 
         #choose random key in dictionary that has max value
-        maxval = max(move_values.values())
-        maxlist = [i[0] for i in move_values.iteritems() if i[1] == maxval]
-
+        maxval = max(moves_and_values.values())
+        print moves_and_values.values()
+        maxlist = [i[0] for i in moves_and_values.iteritems() if i[1] == maxval]
         return self.make_move(player, random.choice(maxlist))
+
+    # @staticmethod
+    # def best_val(func, valuesdict):
+    #     ''' returns list of dict keys that satisfy func '''
+    #     bestval = func(valuesdict.values())
+    #     bestlist = [i[0] for i in valuesdict.iteritems() if i[1] == bestval]
 
 
     # TODO: during draw, this always tries to use (0,0) as last move
