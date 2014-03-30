@@ -35,7 +35,7 @@ class TicTacToeGame:
         if self.is_over():
             raise Exception("No game in progress. Game over.")
 
-        location = random.choice(self.get_locations(BSTATES['EMPTY']))
+        location = random.choice(TicTacToeGame.get_locations(self.board, BSTATES['EMPTY']))
         return self.make_move(player, location)
 
     def collect_values(self, player):
@@ -147,11 +147,10 @@ class TicTacToeGame:
 
         return self.make_move(player, (r, c))
 
-
-    def get_locations(self, bstate):
+    @staticmethod
+    def get_locations(board, bstate):
         ''' returns list of (row, col) tuples at which the board state is
          bstate '''
-        board = self.board
         return [(ri,ci) for ri,row in
                 enumerate(board) for ci,spot in
                 enumerate(row) if spot == bstate]
