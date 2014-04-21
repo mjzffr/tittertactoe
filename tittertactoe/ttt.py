@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 import random
+import copy
 
 # suggestion: BSTATES and GSTATES moved into TicTacToeGame class or to
 # their own class? or something?
@@ -34,7 +35,7 @@ class TicTacToeGame:
         if self.is_over():
             raise Exception("No game in progress. Game over.")
 
-        location = random.choice(self.get_locations(BSTATES['EMPTY']))
+        location = random.choice(TicTacToeGame.get_locations(self.board, BSTATES['EMPTY']))
         return self.make_move(player, location)
 
     def collect_values(self, player):
@@ -100,6 +101,65 @@ class TicTacToeGame:
     def get_horizontal_coords(self, row_i):
         return [(row_i, i) for i in range(self.SIZE)]
 
+
+    def minimax_eval(self, player, possible_board):
+        boardstatus, _ = TicTacToeGame.calc_game_status(possible_board)
+        # check if game is done
+        if boardstatus == self.current_player:
+            return 1 #yay!
+        elif boardstatus == self.current_player * -1:
+            return -1 #boo :(
+        elif boardstatus == GSTATES['DRAW']:
+            return 0
+
+        # Otherwise: game is not done
+        # So, Rate all of possible moves by `player` by building the entire game tree
+        empty_spots = TicTacToeGame.get_locations(possible_board, BSTATES['EMPTY'])
+        next_move_values = []
+        for ri,ci in empty_spots:
+            next_board = copy.deepcopy(possible_board)
+            next_board[ri][ci] = player
+            next_move_values.append(self.minimax_eval(player * -1, next_board))
+
+        # pick best move for `player`
+        if player == self.current_player:
+            return max(next_move_values)
+        elif player == self.current_player * -1:
+            return min(next_move_values)
+        else:
+            return None
+
+    def make_minimax_move(self, player):
+        moves_and_values = {}
+        empty_spots = TicTacToeGame.get_locations(self.board, BSTATES['EMPTY'])
+
+        if self.mode == GSTATES['NOTSTARTED']:
+            # still optimal and way faster to choose random at first
+           return self.make_random_move(player)
+
+        for ri,ci in empty_spots:
+            possible_board = copy.deepcopy(self.board)
+            possible_board[ri][ci] = player
+            moves_and_values[(ri, ci)] = self.minimax_eval(player * -1, possible_board)
+
+        #choose random key in dictionary that has max value
+        maxval = max(moves_and_values.values())
+        print moves_and_values.values()
+        maxlist = [i[0] for i in moves_and_values.iteritems() if i[1] == maxval]
+        return self.make_move(player, random.choice(maxlist))
+
+    # @staticmethod
+    # def best_val(func, valuesdict):
+    #     ''' returns list of dict keys that satisfy func '''
+    #     bestval = func(valuesdict.values())
+    #     bestlist = [i[0] for i in valuesdict.iteritems() if i[1] == bestval]
+
+
+    # TODO: during draw, this always tries to use (0,0) as last move
+    #       File "tittertactoe/ttt.py", line 167, in make_move
+    #     raise ValueError("Location already full " + str((row, col)))
+    # ValueError: Location already full (0, 0)
+
     def make_smart_move(self, player):
         values = self.collect_values(player)
         max_val = -1
@@ -113,10 +173,10 @@ class TicTacToeGame:
 
         return self.make_move(player, (r, c))
 
-
-    def get_locations(self, bstate):
-        ''' returns list of (row, col) tuples '''
-        board = self.board
+    @staticmethod
+    def get_locations(board, bstate):
+        ''' returns list of (row, col) tuples at which the board state is
+         bstate '''
         return [(ri,ci) for ri,row in
                 enumerate(board) for ci,spot in
                 enumerate(row) if spot == bstate]
@@ -160,6 +220,8 @@ class TicTacToeGame:
         else:
             raise ValueError("Location already full " + str((row, col)))
 
+        print self
+
         return (row, col)
 
     def update_points(self):
@@ -184,45 +246,49 @@ class TicTacToeGame:
             self.mode = GSTATES['INPROGRESS']
             return
 
-        def update_mode_helper(line):
-            self.mode = self.board[line[0][0]][line[0][1]]
-            self.lastwincoords = set(line)
-            self.update_points()
+        self.mode, resultcoords = \
+            TicTacToeGame.calc_game_status(self.board)
+        self.update_points()
 
-        for ri,row in enumerate(self.board):
-            if TicTacToeGame.is_winning_line(row):
-                update_mode_helper([(ri,i) for i in range(s)])
-                return
-        for ci,col in enumerate(zip(*self.board)):
-            if TicTacToeGame.is_winning_line(col):
-                update_mode_helper([(i,ci) for i in range(s)])
-                return
-
-        diagonal_coords = [[(i,i) for i in range(s)],
-            [(s-1-i, i) for i in range(s)]]
-        diagonals = [[self.board[i][i] for i in range(s)],
-            [self.board[s-1-i][i] for i in range(s)]]
-
-        for i,l in enumerate(diagonals):
-            if TicTacToeGame.is_winning_line(l):
-                update_mode_helper(diagonal_coords[i])
-                return
-
-        #it's a draw
-        if BSTATES['EMPTY'] not in self.board_1d:
-            self.mode = GSTATES['DRAW']
-            self.lastwincoords = set()
-            return
-
-        #otherwise
-        self.mode = GSTATES['INPROGRESS']
+        # <= 2 means draw, xwon or owon
+        if self.mode <= 2:
+            self.lastwincoords = resultcoords
 
     @staticmethod
     def is_winning_line(line):
         ''' return true if line consists of all 'X' or 'O';
-        line is a list of board spaces, like a row or a diagonal'''
+        line is a list of board space states, like a row or a diagonal'''
         return BSTATES['EMPTY'] not in line and all(line[0] == i for i in \
                                                       line)
+    @staticmethod
+    def calc_game_status(board):
+        ''' return pair of gstate and set of winning line coords if there is one
+        Assuming board is square!'''
+        s = len(board)
+
+        for ri,rowvals in enumerate(board):
+            if TicTacToeGame.is_winning_line(rowvals):
+                return (rowvals[0], set([(ri,i) for i in range(s)]))
+        for ci,colvals in enumerate(zip(*board)):
+            if TicTacToeGame.is_winning_line(colvals):
+                return (colvals[0], set([(i,ci) for i in range(s)]))
+
+        diagonal_coords = [[(i,i) for i in range(s)],
+            [(s - 1 - i, i) for i in range(s)]]
+        diagonals = [[board[i][i] for i in range(s)],
+            [board[s - 1 - i][i] for i in range(s)]]
+
+        for i,diagvals in enumerate(diagonals):
+            if TicTacToeGame.is_winning_line(diagvals):
+                return (diagvals[0], set(diagonal_coords[i]))
+
+        #it's a draw
+        board_1d = [i for row in board for i in row]
+        if BSTATES['EMPTY'] not in board_1d:
+            return (GSTATES['DRAW'], set())
+
+        #otherwise
+        return (GSTATES['INPROGRESS'], set())
 
 
     # assuming game loop is implemented by UI
