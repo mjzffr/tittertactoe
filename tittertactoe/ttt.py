@@ -15,7 +15,7 @@ class TicTacToeGame:
         self.SIZE = size
         self.board = [[BSTATES['EMPTY']] * self.SIZE for _ in range(self.SIZE)]
 
-        self.current_player = BSTATES['P1']
+        self.current_player = BSTATES[random.choice(['P1','P2'])]
         self.mode = GSTATES['NOTSTARTED']
 
         # TODO: feature addition: full game stats: draws, num games
@@ -191,7 +191,7 @@ class TicTacToeGame:
             self.wins[player * -1] += 1
         self.board = [[BSTATES['EMPTY'] for i in range(self.SIZE)] \
                    for i in range(self.SIZE)]
-        self.current_player = BSTATES['P1']
+        self.current_player = BSTATES[random.choice(['P1','P2'])]
         self.mode = GSTATES['NOTSTARTED']
 
     def make_move(self, player, (row,col)):
@@ -220,7 +220,7 @@ class TicTacToeGame:
         else:
             raise ValueError("Location already full " + str((row, col)))
 
-        print self
+        #print self
 
         return (row, col)
 
